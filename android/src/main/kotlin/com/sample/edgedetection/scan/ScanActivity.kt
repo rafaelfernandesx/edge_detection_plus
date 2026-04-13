@@ -11,6 +11,9 @@ import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.exifinterface.media.ExifInterface
 import com.sample.edgedetection.ERROR_CODE
 import com.sample.edgedetection.EdgeDetectionHandler
@@ -29,6 +32,27 @@ import java.io.*
 class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     private lateinit var mPresenter: ScanPresenter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val root = findViewById<View>(android.R.id.content)
+
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.setPadding(
+                v.paddingLeft,
+                v.paddingTop,
+                v.paddingRight,
+                bars.bottom
+            )
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(root)
+    }
 
     override fun provideContentViewId(): Int = R.layout.activity_scan
 
