@@ -1,3 +1,6 @@
+## 1.1.4
+- Atualiza a versao do pacote e sincroniza o podspec iOS.
+
 ## 1.0.2
 - Bug fix podspec file
 
