@@ -20,6 +20,7 @@ class HomeViewController: UIViewController, ImageScannerControllerDelegate {
                 cameraController.overrideUserInterfaceStyle = .dark
                 cameraController.view.backgroundColor = .black
             }
+            cameraController.modalPresentationStyle = .fullScreen
             
             // Temp fix for https://github.com/WeTransfer/WeScan/issues/320
             if #available(iOS 15, *) {
@@ -39,10 +40,8 @@ class HomeViewController: UIViewController, ImageScannerControllerDelegate {
             }
             
             present(cameraController, animated: true) {
-                if let window = UIApplication.shared.keyWindow {
-                    window.addSubview(self.selectPhotoButton)
-                    self.setupConstraints()
-                }
+                self.cameraController.view.addSubview(self.selectPhotoButton)
+                self.setupConstraints()
             }
         }
     }
@@ -72,18 +71,19 @@ class HomeViewController: UIViewController, ImageScannerControllerDelegate {
     }
     
     @objc func selectPhoto() {
-        if let window = UIApplication.shared.keyWindow {
-            window.rootViewController?.dismiss(animated: true, completion: nil)
+        cameraController?.dismiss(animated: true) { [weak self] in
+            guard let self else { return }
             self.hideButtons()
-            
+
             let scanPhotoVC = ScanPhotoViewController()
-            scanPhotoVC._result = _result
+            scanPhotoVC._result = self._result
             scanPhotoVC.saveTo = self.saveTo
+            scanPhotoVC.modalPresentationStyle = .fullScreen
             if #available(iOS 13.0, *) {
                 scanPhotoVC.isModalInPresentation = true
                 scanPhotoVC.overrideUserInterfaceStyle = .dark
             }
-            window.rootViewController?.present(scanPhotoVC, animated: true)
+            self.present(scanPhotoVC, animated: true)
         }
     }
     
@@ -98,15 +98,15 @@ class HomeViewController: UIViewController, ImageScannerControllerDelegate {
             selectPhotoButtonConstraints = [
                 selectPhotoButton.widthAnchor.constraint(equalToConstant: 44.0),
                 selectPhotoButton.heightAnchor.constraint(equalToConstant: 44.0),
-                selectPhotoButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -24.0),
-                view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: selectPhotoButton.bottomAnchor, constant: (65.0 / 2) - 10.0)
+                selectPhotoButton.rightAnchor.constraint(equalTo: cameraController.view.safeAreaLayoutGuide.rightAnchor, constant: -24.0),
+                cameraController.view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: selectPhotoButton.bottomAnchor, constant: (65.0 / 2) - 10.0)
             ]
         } else {
             selectPhotoButtonConstraints = [
                 selectPhotoButton.widthAnchor.constraint(equalToConstant: 44.0),
                 selectPhotoButton.heightAnchor.constraint(equalToConstant: 44.0),
-                selectPhotoButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -24.0),
-                view.bottomAnchor.constraint(equalTo: selectPhotoButton.bottomAnchor, constant: (65.0 / 2) - 10.0)
+                selectPhotoButton.rightAnchor.constraint(equalTo: cameraController.view.rightAnchor, constant: -24.0),
+                cameraController.view.bottomAnchor.constraint(equalTo: selectPhotoButton.bottomAnchor, constant: (65.0 / 2) - 10.0)
             ]
         }
         NSLayoutConstraint.activate(selectPhotoButtonConstraints)

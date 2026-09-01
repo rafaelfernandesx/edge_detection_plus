@@ -18,21 +18,44 @@ public class SwiftEdgeDetectionPlugin: NSObject, FlutterPlugin, UIApplicationDel
 
         if (call.method == "edge_detect")
         {
-            if let viewController = UIApplication.shared.delegate?.window??.rootViewController as? FlutterViewController {
+            if let rootViewController = UIApplication.shared.delegate?.window??.rootViewController {
+                let viewController = rootViewController.visibleViewController
                 let destinationViewController = HomeViewController()
                 destinationViewController.setParams(saveTo: saveTo, canUseGallery: canUseGallery)
                 destinationViewController._result = result
-                viewController.present(destinationViewController,animated: true,completion: nil);
+                destinationViewController.modalPresentationStyle = .fullScreen
+                viewController.present(destinationViewController, animated: true, completion: nil)
             }
         }
         if (call.method == "edge_detect_gallery")
         {
-            if let viewController = UIApplication.shared.delegate?.window??.rootViewController as? FlutterViewController {
+            if let rootViewController = UIApplication.shared.delegate?.window??.rootViewController {
+                let viewController = rootViewController.visibleViewController
                 let destinationViewController = HomeViewController()
                 destinationViewController.setParams(saveTo: saveTo, canUseGallery: canUseGallery)
                 destinationViewController._result = result
-                destinationViewController.selectPhoto();
+                destinationViewController.modalPresentationStyle = .fullScreen
+                viewController.present(destinationViewController, animated: true) {
+                    destinationViewController.selectPhoto()
+                }
             }
         }
+    }
+}
+
+private extension UIViewController {
+    var visibleViewController: UIViewController {
+        if let presentedViewController = presentedViewController {
+            return presentedViewController.visibleViewController
+        }
+        if let navigationController = self as? UINavigationController,
+           let topViewController = navigationController.topViewController {
+            return topViewController.visibleViewController
+        }
+        if let tabBarController = self as? UITabBarController,
+           let selectedViewController = tabBarController.selectedViewController {
+            return selectedViewController.visibleViewController
+        }
+        return self
     }
 }
